@@ -2,6 +2,19 @@
 installation de nmap
 <pre><code>> sudo apt-get install nmap
 > nmap -sP 192.168.1.0/24 
+
+Nmap scan report for csp1.zte.com.cn (192.168.1.1)
+Host is up (0.0052s latency).
+Nmap scan report for 192.168.1.10 (192.168.1.10)
+Host is up (0.0080s latency).
+Nmap scan report for 192.168.1.17 (192.168.1.17)
+Host is up (0.011s latency).
+Nmap scan report for 192.168.1.28 (192.168.1.28)
+Host is up (0.0031s latency).
+Nmap scan report for 192.168.1.255 (192.168.1.255)
+Host is up (0.0040s latency).
+Nmap done: 256 IP addresses (5 hosts up) scanned in 3.19 seconds
+
 > nmap 192.168.1.28
 
 Nmap scan report for 192.168.1.28 (192.168.1.28)
