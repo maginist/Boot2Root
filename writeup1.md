@@ -488,52 +488,19 @@ Le resultat pour de la **phase_4** est donc :
 <pre><code>9</code></pre>
 
 ## Phase_5
+
+
 (gdb)> disas phase_5
+
+La phase 5 prends comment arguments une string puis vérifie sa taille, elle doit faire exactement 6 charactères:
 ```
-Dump of assembler code for function phase_5:
-   0x08048d2c <+0>:     push   %ebp
-   0x08048d2d <+1>:     mov    %esp,%ebp
-   0x08048d2f <+3>:     sub    $0x10,%esp
-   0x08048d32 <+6>:     push   %esi
-   0x08048d33 <+7>:     push   %ebx
-   0x08048d34 <+8>:     mov    0x8(%ebp),%ebx
-   0x08048d37 <+11>:    add    $0xfffffff4,%esp
-   0x08048d3a <+14>:    push   %ebx
    0x08048d3b <+15>:    call   0x8049018 <string_length>
    0x08048d40 <+20>:    add    $0x10,%esp
    0x08048d43 <+23>:    cmp    $0x6,%eax
    0x08048d46 <+26>:    je     0x8048d4d <phase_5+33>
    0x08048d48 <+28>:    call   0x80494fc <explode_bomb>
-   0x08048d4d <+33>:    xor    %edx,%edx
-   0x08048d4f <+35>:    lea    -0x8(%ebp),%ecx
-   0x08048d52 <+38>:    mov    $0x804b220,%esi
-   0x08048d57 <+43>:    mov    (%edx,%ebx,1),%al
-   0x08048d5a <+46>:    and    $0xf,%al
-   0x08048d5c <+48>:    movsbl %al,%eax
-   0x08048d5f <+51>:    mov    (%eax,%esi,1),%al
-   0x08048d62 <+54>:    mov    %al,(%edx,%ecx,1)
-   0x08048d65 <+57>:    inc    %edx
-   0x08048d66 <+58>:    cmp    $0x5,%edx
-   0x08048d69 <+61>:    jle    0x8048d57 <phase_5+43>
-   0x08048d6b <+63>:    movb   $0x0,-0x2(%ebp)
-   0x08048d6f <+67>:    add    $0xfffffff8,%esp
-   0x08048d72 <+70>:    push   $0x804980b
-   0x08048d77 <+75>:    lea    -0x8(%ebp),%eax
-   0x08048d7a <+78>:    push   %eax
-   0x08048d7b <+79>:    call   0x8049030 <strings_not_equal>
-   0x08048d80 <+84>:    add    $0x10,%esp
-   0x08048d83 <+87>:    test   %eax,%eax
-   0x08048d85 <+89>:    je     0x8048d8c <phase_5+96>
-   0x08048d87 <+91>:    call   0x80494fc <explode_bomb>
-   0x08048d8c <+96>:    lea    -0x18(%ebp),%esp
-   0x08048d8f <+99>:    pop    %ebx
-   0x08048d90 <+100>:   pop    %esi
-   0x08048d91 <+101>:   mov    %ebp,%esp
-   0x08048d93 <+103>:   pop    %ebp
-   0x08048d94 <+104>:   ret
-End of assembler dump.
 ```
-
+La chaines de charactères est formater via cette boucle:
 ```
    0x08048d4d <+33>:    xor    %edx,%edx				# set edx à 0
    0x08048d4f <+35>:    lea    -0x8(%ebp),%ecx			# load la string dans ecx
@@ -547,5 +514,24 @@ End of assembler dump.
    0x08048d66 <+58>:    cmp    $0x5,%edx			  | # if edx = 5
    0x08048d69 <+61>:    jle    0x8048d57 <phase_5+43>-  # jump
 ```
+En testant l'aphabet on peux voir que:
 
-On comprend qu'un ROT est appliqué sur la table ASCII.
+<pre>abcdefghijklmnopqrstuvwxyz
+srveawhobpnutfgisrveawhobp</pre>
+
+la phase_5 compare la string formater avec la valeur stocker dans :
+```
+(gdb) x/s 0x804980b
+0x804980b:       "giants"
+```
+
+```
+   0x08048d6b <+63>:    movb   $0x0,-0x2(%ebp)
+   0x08048d6f <+67>:    add    $0xfffffff8,%esp
+   0x08048d72 <+70>:    push   $0x804980b
+   0x08048d77 <+75>:    lea    -0x8(%ebp),%eax
+   0x08048d7a <+78>:    push   %eax
+   0x08048d7b <+79>:    call   0x8049030 <strings_not_equal>
+```
+
+On peux donc formater la string **opekmq** pour passer la phase 5.
