@@ -164,28 +164,171 @@ laurie
 
 ## Partie **./bomb**
 
+On trouve dans le dossier **/home**, un **README** :
+<pre><code>> cat README
+Diffuse this bomb!
+When you have all the password use it as "thor" user with ssh.
 
-### Phase_1
-(gdb) > x/s %0x80497c0
+HINT:
+P
+ 2
+ b
 
-<code>0x80497c0:     "Public speaking is very easy."</code>
-### Phase_2
-breakpoint : compare
-print chaque %eax.
+o
+4
 
-<code>1 2 6 24 120 720</code>
-### Phase_3
-```gdb
+NO SPACE IN THE PASSWORD (password is case sensitive).
+</code></pre>
+
+Et un binaire **./bomb**, qu'on lance:
+<pre><code>> ./bomb
+Welcome this is my little bomb !!!! You have 6 stages with
+only one life good luck !! Have a nice day!
+test
+
+BOOM!!!
+The bomb has blown up.
+</code></pre>
+
+On va devoir trouver l'input pour passer.
+On utilise **GNU Debugger** pour regarder, ce à quoi ressemble le binaire :
+```
+> gdb ./bomb -q
+Reading symbols from /home/laurie/bomb...done.
+(gdb)> disas main
+Dump of assembler code for function main:
 ...
-0x08048bb7 <+31>:    call   0x8048860 <sscanf@plt>	# ("1 b 214", "%d %c %d")
+   0x08048a5b <+171>:   call   0x8048b20 <phase_1>
+   0x08048a60 <+176>:   call   0x804952c <phase_defused>
+...
+   0x08048a7e <+206>:   call   0x8048b48 <phase_2>
+   0x08048a83 <+211>:   call   0x804952c <phase_defused>
+...
+   0x08048aa1 <+241>:   call   0x8048b98 <phase_3>
+   0x08048aa6 <+246>:   call   0x804952c <phase_defused>
+...
+   0x08048ac4 <+276>:   call   0x8048ce0 <phase_4>
+   0x08048ac9 <+281>:   call   0x804952c <phase_defused>
+...
+   0x08048ae7 <+311>:   call   0x8048d2c <phase_5>
+   0x08048aec <+316>:   call   0x804952c <phase_defused>
+...
+   0x08048b0a <+346>:   call   0x8048d98 <phase_6>
+   0x08048b0f <+351>:   call   0x804952c <phase_defused>
+...
+```
+> On observe qu'il y aura 6 phases a passer avant de pouvoir defuser la bombe
+
+## Phase_1
+
+```
+(gdb)> disas phase_1
+Dump of assembler code for function phase_1:
+   0x08048b20 <+0>:     push   %ebp
+   0x08048b21 <+1>:     mov    %esp,%ebp
+   0x08048b23 <+3>:     sub    $0x8,%esp
+   0x08048b26 <+6>:     mov    0x8(%ebp),%eax
+   0x08048b29 <+9>:     add    $0xfffffff8,%esp
+   0x08048b2c <+12>:    push   $0x80497c0
+   0x08048b31 <+17>:    push   %eax
+   0x08048b32 <+18>:    call   0x8049030 <strings_not_equal>
+   0x08048b37 <+23>:    add    $0x10,%esp
+   0x08048b3a <+26>:    test   %eax,%eax
+   0x08048b3c <+28>:    je     0x8048b43 <phase_1+35>
+   0x08048b3e <+30>:    call   0x80494fc <explode_bomb>
+   0x08048b43 <+35>:    mov    %ebp,%esp
+   0x08048b45 <+37>:    pop    %ebp
+   0x08048b46 <+38>:    ret
+End of assembler dump.
+(gdb)> x/s 0x80497c0
+0x80497c0:       "Public speaking is very easy."
+```
+> On utilise **x/s** pour lire la valeur **0x80497c0**
+
+Le resultat pour de la **phase_1** est donc :
+<pre><code>Public speaking is very easy.</code></pre>
+
+## Phase_2
+```
+(gdb)> disas phase_2
+Dump of assembler code for function phase_2:
+   0x08048b48 <+0>:     push   %ebp
+   0x08048b49 <+1>:     mov    %esp,%ebp
+   0x08048b4b <+3>:     sub    $0x20,%esp
+   0x08048b4e <+6>:     push   %esi
+   0x08048b4f <+7>:     push   %ebx
+   0x08048b50 <+8>:     mov    0x8(%ebp),%edx
+   0x08048b53 <+11>:    add    $0xfffffff8,%esp
+   0x08048b56 <+14>:    lea    -0x18(%ebp),%eax
+   0x08048b59 <+17>:    push   %eax
+   0x08048b5a <+18>:    push   %edx
+   0x08048b5b <+19>:    call   0x8048fd8 <read_six_numbers>
+   0x08048b60 <+24>:    add    $0x10,%esp
+   0x08048b63 <+27>:    cmpl   $0x1,-0x18(%ebp)
+   0x08048b67 <+31>:    je     0x8048b6e <phase_2+38>
+   0x08048b69 <+33>:    call   0x80494fc <explode_bomb>
+   0x08048b6e <+38>:    mov    $0x1,%ebx
+   0x08048b73 <+43>:    lea    -0x18(%ebp),%esi
+   0x08048b76 <+46>:    lea    0x1(%ebx),%eax
+   0x08048b79 <+49>:    imul   -0x4(%esi,%ebx,4),%eax
+   0x08048b7e <+54>:    cmp    %eax,(%esi,%ebx,4)
+   0x08048b81 <+57>:    je     0x8048b88 <phase_2+64>
+   0x08048b83 <+59>:    call   0x80494fc <explode_bomb>
+   0x08048b88 <+64>:    inc    %ebx
+   0x08048b89 <+65>:    cmp    $0x5,%ebx
+   0x08048b8c <+68>:    jle    0x8048b76 <phase_2+46>
+   0x08048b8e <+70>:    lea    -0x28(%ebp),%esp
+   0x08048b91 <+73>:    pop    %ebx
+   0x08048b92 <+74>:    pop    %esi
+   0x08048b93 <+75>:    mov    %ebp,%esp
+   0x08048b95 <+77>:    pop    %ebp
+   0x08048b96 <+78>:    ret
+End of assembler dump.
+```
+On observe la presence d'une boucle :
+```
+   0x08048b76 <+46>:    lea    0x1(%ebx),%eax
+   0x08048b79 <+49>:    imul   -0x4(%esi,%ebx,4),%eax
+   0x08048b7e <+54>:    cmp    %eax,(%esi,%ebx,4)
+   0x08048b81 <+57>:    je     0x8048b88 <phase_2+64>
+   0x08048b83 <+59>:    call   0x80494fc <explode_bomb>
+   0x08048b88 <+64>:    inc    %ebx
+   0x08048b89 <+65>:    cmp    $0x5,%ebx
+   0x08048b8c <+68>:    jle    0x8048b76 <phase_2+46>
+```
+Ainsi que ces deux lignes :
+```
+   0x08048b7e <+54>:    cmp    %eax,(%esi,%ebx,4)
+   0x08048b81 <+57>:    je     0x8048b88 <phase_2+64
+```
+
+On comprend donc que si la comparaison **%eax (%esi,%ebx,4)** ne fonctionne pas on appelle la fonction <code>explode_bomb</code>
+
+On fait donc un **breakpoint** sur la ligne 54, afin de voir à quelle valeur **%eax** est comparé.
+
+On sait que l'on a besoin d'effectuer cette action 6 fois car 6 nombres sont requis :
+```
+0x08048b5b <+19>:    call   0x8048fd8 <read_six_numbers>
+```
+
+
+Le resultat pour de la **phase_2** est donc :
+<pre><code>1 2 6 24 120 720</code></pre>
+
+## Phase_3
+```
+(gdb)> disas phase_3
+Dump of assembler code for function phase_3:
+...
+0x08048bb7 <+31>:    call   0x8048860 <sscanf@plt>	# ("%d %c %d")
 0x08048bbc <+36>:    add    $0x20,%esp
-0x08048bbf <+39>:    cmp    $0x2,%eax				#Compare le nombre d'arg de sscanf si moins de 3 explode
+0x08048bbf <+39>:    cmp    $0x2,%eax				# Compare le nombre d'arg de sscanf si moins de 3 explode
 0x08048bc2 <+42>:    jg     0x8048bc9 <phase_3+49>
 0x08048bc4 <+44>:    call   0x80494fc <explode_bomb>
-0x08048bc9 <+49>:    cmpl   $0x7,-0xc(%ebp)			# Compare la valeur du premier arg dans notre cas 1 elle doit être inferieur a 7
+0x08048bc9 <+49>:    cmpl   $0x7,-0xc(%ebp)			# Compare la valeur du premier arg a 7 (< 7)
 0x08048bcd <+53>:    ja     0x8048c88 <phase_3+240>
 0x08048bd3 <+59>:    mov    -0xc(%ebp),%eax
-0x08048bd6 <+62>:    jmp    *0x80497e8(,%eax,4)		# Jump a l'adress 0x80497e8 + 4 * valeur du premier arg
+0x08048bd6 <+62>:    jmp    *0x80497e8(,%eax,4)		# Jump a l'adresse 0x80497e8 + 4 * valeur du premier arg
 0x08048bdd <+69>:    lea    0x0(%esi),%esi
 0x08048be0 <+72>:    mov    $0x71,%bl
 0x08048be2 <+74>:    cmpl   $0x309,-0x4(%ebp)
@@ -193,8 +336,8 @@ print chaque %eax.
 0x08048bef <+87>:    call   0x80494fc <explode_bomb>
 0x08048bf4 <+92>:    jmp    0x8048c8f <phase_3+247> 
 0x08048bf9 <+97>:    lea    0x0(%esi,%eiz,1),%esi
-0x08048c00 <+104>:   mov    $0x62,%bl				# Load 214 dans bl
-0x08048c02 <+106>:   cmpl   $0xd6,-0x4(%ebp)		# Jump a 147  et fini
+0x08048c00 <+104>:   mov    $0x62,%bl				# Load 214 dans bl, code ASCII de b
+0x08048c02 <+106>:   cmpl   $0xd6,-0x4(%ebp)		# Jump a 247 et fini
 ...
 0x08048c86 <+238>:    jmp    0x8048c8f <phase_3+247>
 0x08048c88 <+240>:    mov    $0x78,%bl
@@ -207,9 +350,82 @@ print chaque %eax.
 0x08048c9e <+262>:    pop    %ebp
 0x08048c9f <+263>:    ret
 ```
-<code>1 b 214</code>
-### Phase_4
+On sait que le resultat attendu sera :
 ```
+0x08048bb7 <+31>:    call   0x8048860 <sscanf@plt>	# ("%d %c %d")
+```
+
+On sait aussi grâce a l'indice de README que le **%c** est 'b'.
+On cherche donc les deux nombres manquants.
+
+On sait que le premier nombre doit être inférieur a 7:
+<pre><code>0x08048bc9 <+49>:    cmpl   $0x7,-0xc(%ebp)</code></pre>
+
+De plus la ligne ci-dessous effectue un **jump** à l'adresse stocké à l'adresse 
+**0x80497e8 + la valeur de notre premier argument * 4** :
+<pre><code>0x08048bd6 <+62>:    jmp    *0x80497e8(,%eax,4)</code></pre>
+
+Si on affiche la range de notre adresse avec les 30 suivantes :
+```
+(gdb)> x/30x 0x80497e8
+0x80497e8:      0x08048be0      0x08048c00      0x08048c16      0x08048c28
+0x80497f8:      0x08048c40      0x08048c52      0x08048c64      >0x08048c76
+```
+> On peut voir que **0x08048c00** correspond a un jump cohérent vers la ligne 104 de **phase_3**, donc 1 adresse plus loin.
+
+De plus, a cette valeur ce trouve :
+<pre><code>0x08048c00 <+104>:   mov    $0x62,%bl</code></pre>
+> Qui load la lettre b dans %bl
+
+Par la suite on observe :
+<pre><code>0x08048c8f <+247>:    cmp    -0x5(%ebp),%bl</code></pre>
+
+Et pour finir on observe:
+<pre><code>0x08048c02 <+106>:   cmpl   $0xd6,-0x4(%ebp)</code></pre>
+> Qui compare la valeur 214 avec notre troisième argument.
+
+Le resultat pour de la **phase_3** est donc :
+<pre><code>1 b 214</code></pre>
+
+## Phase_4
+```
+(gdb) disas phase_4
+Dump of assembler code for function phase_4:
+   0x08048ce0 <+0>:     push   %ebp
+   0x08048ce1 <+1>:     mov    %esp,%ebp
+   0x08048ce3 <+3>:     sub    $0x18,%esp
+   0x08048ce6 <+6>:     mov    0x8(%ebp),%edx
+   0x08048ce9 <+9>:     add    $0xfffffffc,%esp
+   0x08048cec <+12>:    lea    -0x4(%ebp),%eax
+   0x08048cef <+15>:    push   %eax
+   0x08048cf0 <+16>:    push   $0x8049808				# "%d
+   0x08048cf5 <+21>:    push   %edx
+   0x08048cf6 <+22>:    call   0x8048860 <sscanf@plt>
+   0x08048cfb <+27>:    add    $0x10,%esp
+   0x08048cfe <+30>:    cmp    $0x1,%eax
+   0x08048d01 <+33>:    jne    0x8048d09 <phase_4+41>
+   0x08048d03 <+35>:    cmpl   $0x0,-0x4(%ebp)
+   0x08048d07 <+39>:    jg     0x8048d0e <phase_4+46>
+   0x08048d09 <+41>:    call   0x80494fc <explode_bomb>
+   0x08048d0e <+46>:    add    $0xfffffff4,%esp
+   0x08048d11 <+49>:    mov    -0x4(%ebp),%eax
+   0x08048d14 <+52>:    push   %eax
+   0x08048d15 <+53>:    call   0x8048ca0 <func4>
+   0x08048d1a <+58>:    add    $0x10,%esp
+   0x08048d1d <+61>:    cmp    $0x37,%eax
+   0x08048d20 <+64>:    je     0x8048d27 <phase_4+71>
+   0x08048d22 <+66>:    call   0x80494fc <explode_bomb>
+   0x08048d27 <+71>:    mov    %ebp,%esp
+   0x08048d29 <+73>:    pop    %ebp
+   0x08048d2a <+74>:    ret
+End of assembler dump.
+```
+
+On observe que la phase_4 prend un nombre en argument puis appelle une fonction **func4** :
+
+```
+(gdb)> disas func4
+Dump of assembler code for function func4:
 0x08048ca0 <+0>:    push   %ebp
 0x08048ca1 <+1>:    mov    %esp,%ebp
 0x08048ca3 <+3>:    sub    $0x10,%esp
@@ -261,6 +477,75 @@ int main(int ac, char **av)
 
 	nb = atoi(av[1]);
 	nb = func4(nb);
-	printf("%d\n", nb);
 }
 ```
+
+A la fin de **phase_4** on compare le return de **func4** avec 55:
+<pre><code>   0x08048d1d <+61>:    cmp    $0x37,%eax</code></pre>
+> Apres plusieurs essais avec le code en **C**, on trouve que 9 nous donnes 55.
+
+Le resultat pour de la **phase_4** est donc :
+<pre><code>9</code></pre>
+
+## Phase_5
+(gdb)> disas phase_5
+```
+Dump of assembler code for function phase_5:
+   0x08048d2c <+0>:     push   %ebp
+   0x08048d2d <+1>:     mov    %esp,%ebp
+   0x08048d2f <+3>:     sub    $0x10,%esp
+   0x08048d32 <+6>:     push   %esi
+   0x08048d33 <+7>:     push   %ebx
+   0x08048d34 <+8>:     mov    0x8(%ebp),%ebx
+   0x08048d37 <+11>:    add    $0xfffffff4,%esp
+   0x08048d3a <+14>:    push   %ebx
+   0x08048d3b <+15>:    call   0x8049018 <string_length>
+   0x08048d40 <+20>:    add    $0x10,%esp
+   0x08048d43 <+23>:    cmp    $0x6,%eax
+   0x08048d46 <+26>:    je     0x8048d4d <phase_5+33>
+   0x08048d48 <+28>:    call   0x80494fc <explode_bomb>
+   0x08048d4d <+33>:    xor    %edx,%edx
+   0x08048d4f <+35>:    lea    -0x8(%ebp),%ecx
+   0x08048d52 <+38>:    mov    $0x804b220,%esi
+   0x08048d57 <+43>:    mov    (%edx,%ebx,1),%al
+   0x08048d5a <+46>:    and    $0xf,%al
+   0x08048d5c <+48>:    movsbl %al,%eax
+   0x08048d5f <+51>:    mov    (%eax,%esi,1),%al
+   0x08048d62 <+54>:    mov    %al,(%edx,%ecx,1)
+   0x08048d65 <+57>:    inc    %edx
+   0x08048d66 <+58>:    cmp    $0x5,%edx
+   0x08048d69 <+61>:    jle    0x8048d57 <phase_5+43>
+   0x08048d6b <+63>:    movb   $0x0,-0x2(%ebp)
+   0x08048d6f <+67>:    add    $0xfffffff8,%esp
+   0x08048d72 <+70>:    push   $0x804980b
+   0x08048d77 <+75>:    lea    -0x8(%ebp),%eax
+   0x08048d7a <+78>:    push   %eax
+   0x08048d7b <+79>:    call   0x8049030 <strings_not_equal>
+   0x08048d80 <+84>:    add    $0x10,%esp
+   0x08048d83 <+87>:    test   %eax,%eax
+   0x08048d85 <+89>:    je     0x8048d8c <phase_5+96>
+   0x08048d87 <+91>:    call   0x80494fc <explode_bomb>
+   0x08048d8c <+96>:    lea    -0x18(%ebp),%esp
+   0x08048d8f <+99>:    pop    %ebx
+   0x08048d90 <+100>:   pop    %esi
+   0x08048d91 <+101>:   mov    %ebp,%esp
+   0x08048d93 <+103>:   pop    %ebp
+   0x08048d94 <+104>:   ret
+End of assembler dump.
+```
+
+```
+   0x08048d4d <+33>:    xor    %edx,%edx				# set edx à 0
+   0x08048d4f <+35>:    lea    -0x8(%ebp),%ecx			# load la string dans ecx
+   0x08048d52 <+38>:    mov    $0x804b220,%esi			# move "isrveawhobpnutfg" dans esi
+   0x08048d57 <+43>:    mov    (%edx,%ebx,1),%al  <---  # move dans al (edx + ebx*1)
+   0x08048d5a <+46>:    and    $0xf,%al				  | # add à "al" la valeur 0xf = 32
+   0x08048d5c <+48>:    movsbl %al,%eax				  | # move qui extend de 8b a 32(int)
+   0x08048d5f <+51>:    mov    (%eax,%esi,1),%al	  | # move dans al la valeur (eax + esi*1)
+   0x08048d62 <+54>:    mov    %al,(%edx,%ecx,1)	  | # move dans (edx + ecx*1) la valeur de al
+   0x08048d65 <+57>:    inc    %edx					  | # incrémente edx
+   0x08048d66 <+58>:    cmp    $0x5,%edx			  | # if edx = 5
+   0x08048d69 <+61>:    jle    0x8048d57 <phase_5+43>-  # jump
+```
+
+On comprend qu'un ROT est appliqué sur la table ASCII.
