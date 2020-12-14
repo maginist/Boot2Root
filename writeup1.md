@@ -488,8 +488,6 @@ Le resultat pour de la **phase_4** est donc :
 <pre><code>9</code></pre>
 
 ## Phase_5
-
-
 (gdb)> disas phase_5
 
 La phase 5 prends comment arguments une string puis vérifie sa taille, elle doit faire exactement 6 charactères:
@@ -534,4 +532,46 @@ la phase_5 compare la string formater avec la valeur stocker dans :
    0x08048d7b <+79>:    call   0x8049030 <strings_not_equal>
 ```
 
-On peux donc formater la string **opekmq** pour passer la phase 5.
+Le resultat pour de la **phase_5** est donc :
+<pre><code>opekmq</code></pre>
+> A noter que plusieurs résultats sont possibles ici.
+
+## Phase_6
+(gdb)> disas phase_6
+
+
+On obtient donc, si on suit ce que le README dit:
+
+<code>Publicspeakingisveryeasy.126241207201b2149opekmq426315</code>
+
+Cependant le mot de passe de l'ISO est :
+
+<code>Publicspeakingisveryeasy.126241207201b2149opekmq426135</code>
+> Le sujet n'est pas a jour, il faut inverser le char **n-1** avec le char **n-2**
+
+# Partie Turtle
+
+On trouve un fichier **turtle** qui contient des instructions telles que:
+
+<pre><code>
+Avance 100 spaces
+...
+Tourne droite de 90 degrees
+...
+Tourne gauche de 1 degrees
+...
+Recule 200 spaces
+...
+</code></pre>
+
+Apres quelques recherches, on trouve qu'il s'agit d'un langage se nommant **LOGO**. On transforme le code avec les vraies instructions :
+<pre><code>
+forward(100)
+...
+right(90)
+...
+left(1)
+...
+Recule 200 spaces
+...
+</code></pre>
