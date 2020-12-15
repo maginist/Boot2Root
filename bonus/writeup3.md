@@ -33,4 +33,4 @@ Une fois dans le terminal "**Recovery**" on tape la commande suivante:
 > On utlise le label live pour boot normalement et on y ajoute la commande <code>init=/bin/sh</code>, ce qui va obliger le kernel a éxécuter /bin/sh au lieu de sont init par défaut.
 
 
-![Root to Boot](bonus.png "Screenshot")
+![Root to Boot](writeup3.png "Screenshot")

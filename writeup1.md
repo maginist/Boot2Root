@@ -690,7 +690,7 @@ Avec SLASH dans MD5 on trouve : <code>646da671ca01bb5d84dbb5fb2238dc8e</code>
 qui est le mot de passe de zaz.
 
 # Partie Exploit Me
-En se connectant à zaz on trouve le binaire **./exploit_me**
+En se connectant à **zaz** on trouve le binaire **./exploit_me**
 
 ```
 > gdb -q ./exploit_me
