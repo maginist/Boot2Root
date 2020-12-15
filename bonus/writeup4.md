@@ -1,6 +1,6 @@
 # Buffer Overflow Nopslide exploit
 
-A partir de **zaz**, on reprend le binaire **exploit_me** que l'on avait exploit dans le [writeup1](https://github.com/maginist/Boot2Root/blob/master/writeup1.md) :
+A partir de **zaz**, on reprend le binaire **exploit_me** que l'on avait exploiter dans le [writeup1](https://github.com/maginist/Boot2Root/blob/master/writeup1.md) :
 
 ```
 gdb -q ./exploit_me
@@ -45,9 +45,9 @@ On connait l'adresse du buffer qui est :
 
 <code>0xbffff640</code>
 
-On connait l'**offset**, auquel on ecrase **%eip**, qui est de 140.
+On connait l'**offset**, auquel on ecrase **%eip**, qui est de 140 et possede une taille de 4.
 
-On utilse le **SHELLCODE**, créer de la maniere suivante :
+On utilse le **SHELLCODE** 23 bytes, génerer de la maniere suivante :
 
 ### <span>script.sh</span>
 ```bash
