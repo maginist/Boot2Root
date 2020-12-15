@@ -20,9 +20,9 @@ Durant ce projet, vous allez surement rencontrer des difficultés : soyons clair
 
 | Name | French | Sources
 |:---------|:--------:|:--------:|
-| Writeup1 | [FR](https://github.com/ChokMania/snow-crash/blob/master/writeup1.md) | [link_1's name]() |
-| Writeup2 | [FR](https://github.com/ChokMania/snow-crash/blob/master/writeup2.md) | [link_1's name]() |
-| Writeup3 | [FR](https://github.com/ChokMania/snow-crash/blob/master/bonus/writeup3.md) | [link_1's name]() |
+| Writeup1 | [FR](https://github.com/ChokMania/Boot2Root/blob/master/writeup1.md) | [link_1's name]() |
+| Writeup2 | [FR](https://github.com/ChokMania/Boot2Root/blob/master/writeup2.md) | [link_1's name]() |
+| Writeup3 | [FR](https://github.com/ChokMania/Boot2Root/blob/master/bonus/writeup3.md) | [link_1's name]() |
 
 ## Auteurs
 
