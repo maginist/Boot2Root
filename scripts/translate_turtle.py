@@ -2,9 +2,8 @@ import turtle
 import time
 
 s = turtle.getscreen()
-
 t = turtle.Turtle()
-turtle.title("My Turtle Program")
+turtle.title("Turtle Translator")
 t.home()
 t.left(90)
 time.sleep(2)
