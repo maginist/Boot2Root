@@ -693,6 +693,7 @@ Recule 200 spaces
 À l'aide d'un interpréteur en ligne : https://www.calormen.com/jslogo/
 On lance le code ainsi transformé bloc par bloc qui donnent :
 S L A S H
+> Ou à l'aide de notre script **translate_turtle**.
 
 Avec SLASH dans MD5 on trouve : <code>646da671ca01bb5d84dbb5fb2238dc8e</code>
 qui est le mot de passe de zaz.
@@ -783,8 +784,8 @@ $2 = {<text variable, no debug info>} 0xb7e5ebe0 <exit>
 ```
 >On réécrit l'adresse de **system** sur l'adresse sauvegardée de **%eip**, puis l'adresse de **exit** pour que le programme quitte normalement à la sortie du shell et enfin l'adresse de **/bin/sh** pour lancer un terminal.
 
-Nous obtenons donc un terminal avec les droits **root** : 
+Nous obtenons un terminal avec les droits **root** :
 ```
-> whoami
-root
+> id
+uid=1005(zaz) gid=1005(zaz) euid=0(root) groups=0(root),1005(zaz)
 ```
