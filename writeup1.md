@@ -113,7 +113,7 @@ Ceci nous donnes accès à deux fichiers:
 README
 </code></pre>
 
->README:
+>README :
 ><pre><code>Complete this little challenge and use the result as password for user 'laurie' to login in ssh</code></pre>
 
 On cherche à savoir le type de fichier de fun :
@@ -487,8 +487,53 @@ A la fin de **phase_4** on compare le return de **func4** avec 55:
 Le resultat pour de la **phase_4** est donc :
 <pre><code>9</code></pre>
 
+
 ## Phase_5
+```gdb
 (gdb)> disas phase_5
+Dump of assembler code for function phase_5:
+   0x08048d2c <+0>:     push   %ebp
+   0x08048d2d <+1>:     mov    %esp,%ebp
+   0x08048d2f <+3>:     sub    $0x10,%esp
+   0x08048d32 <+6>:     push   %esi
+   0x08048d33 <+7>:     push   %ebx
+   0x08048d34 <+8>:     mov    0x8(%ebp),%ebx
+   0x08048d37 <+11>:    add    $0xfffffff4,%esp
+   0x08048d3a <+14>:    push   %ebx
+   0x08048d3b <+15>:    call   0x8049018 <string_length>
+   0x08048d40 <+20>:    add    $0x10,%esp
+   0x08048d43 <+23>:    cmp    $0x6,%eax
+   0x08048d46 <+26>:    je     0x8048d4d <phase_5+33>
+   0x08048d48 <+28>:    call   0x80494fc <explode_bomb>
+   0x08048d4d <+33>:    xor    %edx,%edx
+   0x08048d4f <+35>:    lea    -0x8(%ebp),%ecx
+   0x08048d52 <+38>:    mov    $0x804b220,%esi
+   0x08048d57 <+43>:    mov    (%edx,%ebx,1),%al
+   0x08048d5a <+46>:    and    $0xf,%al
+   0x08048d5c <+48>:    movsbl %al,%eax
+   0x08048d5f <+51>:    mov    (%eax,%esi,1),%al
+   0x08048d62 <+54>:    mov    %al,(%edx,%ecx,1)
+   0x08048d65 <+57>:    inc    %edx
+   0x08048d66 <+58>:    cmp    $0x5,%edx
+   0x08048d69 <+61>:    jle    0x8048d57 <phase_5+43>
+   0x08048d6b <+63>:    movb   $0x0,-0x2(%ebp)
+   0x08048d6f <+67>:    add    $0xfffffff8,%esp
+   0x08048d72 <+70>:    push   $0x804980b
+   0x08048d77 <+75>:    lea    -0x8(%ebp),%eax
+   0x08048d7a <+78>:    push   %eax
+   0x08048d7b <+79>:    call   0x8049030 <strings_not_equal>
+   0x08048d80 <+84>:    add    $0x10,%esp
+   0x08048d83 <+87>:    test   %eax,%eax
+   0x08048d85 <+89>:    je     0x8048d8c <phase_5+96>
+   0x08048d87 <+91>:    call   0x80494fc <explode_bomb>
+   0x08048d8c <+96>:    lea    -0x18(%ebp),%esp
+   0x08048d8f <+99>:    pop    %ebx
+   0x08048d90 <+100>:   pop    %esi
+   0x08048d91 <+101>:   mov    %ebp,%esp
+   0x08048d93 <+103>:   pop    %ebp
+   0x08048d94 <+104>:   ret
+End of assembler dump.
+```
 
 La phase 5 prends comment arguments une string puis vérifie sa taille, elle doit faire exactement 6 charactères:
 ```
@@ -512,14 +557,14 @@ La chaines de charactères est formater via cette boucle:
    0x08048d66 <+58>:    cmp    $0x5,%edx			  | # if edx = 5
    0x08048d69 <+61>:    jle    0x8048d57 <phase_5+43>-  # jump
 ```
-En testant l'aphabet on peux voir que:
+En testant l'aphabet on peux voir que :
 
 <pre>abcdefghijklmnopqrstuvwxyz
 srveawhobpnutfgisrveawhobp</pre>
 
 la phase_5 compare la string formater avec la valeur stocker dans :
 ```
-(gdb) x/s 0x804980b
+(gdb)> x/s 0x804980b
 0x804980b:       "giants"
 ```
 
@@ -537,8 +582,79 @@ Le resultat pour de la **phase_5** est donc :
 > A noter que plusieurs résultats sont possibles ici.
 
 ## Phase_6
+```
 (gdb)> disas phase_6
+Dump of assembler code for function phase_6:
+...
+0x08048db3 <+27>:    call   0x8048fd8 <read_six_numbers> # 6 nombres
+0x08048dba <+34>:    add    $0x10,%esp
+0x08048dbd <+37>:    lea    0x0(%esi),%esi
+0x08048dc0 <+40>:    lea    -0x18(%ebp),%eax
+0x08048dc3 <+43>:    mov    (%eax,%edi,4),%eax
+0x08048dc6 <+46>:    dec    %eax
+0x08048dc7 <+47>:    cmp    $0x5,%eax
+0x08048dca <+50>:    jbe    0x8048dd1 <phase_6+57>        # if %eax <= 5
+0x08048dcc <+52>:    call   0x80494fc <explode_bomb>
+0x08048dd1 <+57>:    lea    0x1(%edi),%ebx                # %ebx = %edi + 1
+0x08048dd4 <+60>:    cmp    $0x5,%ebx
+0x08048dd7 <+63>:    jg     0x8048dfc <phase_6+100>       # if %edx > 5
+0x08048dd9 <+65>:    lea    0x0(,%edi,4),%eax 
+0x08048de0 <+72>:    mov    %eax,-0x38(%ebp)
+0x08048de3 <+75>:    lea    -0x18(%ebp),%esi
+0x08048de6 <+78>:    mov    -0x38(%ebp),%edx
+0x08048de9 <+81>:    mov    (%edx,%esi,1),%eax
+0x08048dec <+84>:    cmp    (%esi,%ebx,4),%eax
+0x08048def <+87>:    jne    0x8048df6 <phase_6+94>        # if unique
+0x08048df1 <+89>:    call   0x80494fc <explode_bomb>
+0x08048df6 <+94>:    inc    %ebx                          # %ebx ++
+0x08048df7 <+95>:    cmp    $0x5,%ebx
+0x08048dfa <+98>:    jle    0x8048de6 <phase_6+78>        # if %ebx <= 5
+0x08048dfc <+100>:    inc    %edi                         # edi++
+0x08048dfd <+101>:    cmp    $0x5,%edi
+0x08048e00 <+104>:    jle    0x8048dc0 <phase_6+40>        # %edi <= 5
+...
+End of assembler dump.
+```
 
+On regardant le code, on se rend compte qu'il faut 6 arguments et que tous les nombres - 1 doit compris entre 0 et 5, donc entre 1 et 6 et de maniere unique.
+
+De plus avec le hint on sait que le premier nombre est 4.
+
+On a donc 120 possibilités d'arrangements. Il fait donc un script qui va tous tester :
+
+```python
+import itertools
+import os
+
+t = ["1", "2", "3", "5", "6"]
+c = list(itertools.permutations(t, 5))
+unq = set(c)
+for i in unq:
+	content = "Public speaking is very easy.\n1 2 6 24 120 720\n1 b 214\n9\nopekmq\n4 {}\n".format(' '.join(i))
+	with open("soluce.txt", "w+") as f:
+		f.write(content)
+	os.system('./bomb soluce.txt > result')
+	with open('result') as f:
+		if 'BOOM' not in f.read():
+			print(content.replace("\n", "").replace(" ", ""))
+```
+<pre><code>> python test.py
+> cat soluce
+...
+4 3 1 2 5 6
+</code></pre>
+
+Le resultat pour de la **phase_6** est donc :
+<pre><code>4 2 6 3 1 5</code></pre>
+
+On obtient donc, si on suit ce que le README dit:
+
+<code>Publicspeakingisveryeasy.126241207201b2149opekmq426315</code>
+
+Cependant le mot de passe de l'ISO est :
+
+<code>Publicspeakingisveryeasy.126241207201b2149opekmq426135</code>
+> Le sujet n'est pas a jour, il faut inverser le char **n-1** avec le char **n-2**
 
 On obtient donc, si on suit ce que le README dit:
 
